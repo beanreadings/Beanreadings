@@ -1,38 +1,38 @@
-use rand::Rng;
+//! Beanreadings simulation library
+//!
+//! Forward: Right now, the death rate is much, much lower than the birth rate. However, it is
+//! forcasted that the death rate will increase in the future. This simulation is designed to help
+//! forecast the future death rate, and to help us understand what we can do to prevent it.
+//!
+//! Our current projections show that the death rate will be higher than the birth rate by 2100.
+//! Source: Our World in Data
+//!
+//! Beanreadings helps us understand the future death rate by simulating different scenarios.
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
+pub struct Diet {
+    // 1.00 = 100% of what we need, 0.50 = 50% of what we need
+    calcium: f64,
+}
+
+impl Default for Diet {
+    fn default() -> Self {
+        Self { calcium: 1.0 }
+    }
 }
 
 #[wasm_bindgen]
 pub struct SimulationConfig {
-    death_rate: f64,
-    birth_rate: f64,
-    base: isize,
-    years: isize,
-    cancer_rate: f64,
-    cancer_death_rate: f64,
-    cancer_recovery_rate: f64,
-    people_with_cancer: isize,
-    disaster_rate: f64,
-    disasters: isize,
+    diet_settings: Diet,
 }
 
 impl Default for SimulationConfig {
     fn default() -> Self {
         Self {
-            death_rate: 0.0185,
-            birth_rate: 0.0370,
-            cancer_rate: 10.0,
-            cancer_recovery_rate: 10.0,
-            cancer_death_rate: 5.0,
-            people_with_cancer: 500,
-            base: 1000,
-            years: 10,
-            disaster_rate: 1.0,
-            disasters: 0,
+            diet_settings: Diet {
+                ..Default::default()
+            },
         }
     }
 }
@@ -44,33 +44,6 @@ impl SimulationConfig {
         SimulationConfig {
             ..SimulationConfig::default()
         }
-    }
-    pub fn cancer_recovery_rate(&mut self, amount: f64) {
-        self.cancer_recovery_rate = amount;
-    }
-    pub fn cancer_death_rate(&mut self, amount: f64) {
-        self.cancer_death_rate = amount;
-    }
-    pub fn people_with_cancer(&mut self, amount: isize) {
-        self.people_with_cancer = amount;
-    }
-    pub fn cancer_rate(&mut self, amount: f64) {
-        self.cancer_rate = amount;
-    }
-    pub fn death_rate(&mut self, amount: f64) {
-        self.death_rate = amount;
-    }
-    pub fn birth_rate(&mut self, amount: f64) {
-        self.birth_rate = amount;
-    }
-    pub fn base_population(&mut self, amount: isize) {
-        self.base = amount;
-    }
-    pub fn years(&mut self, amount: isize) {
-        self.years = amount;
-    }
-    pub fn disaster_rate(&mut self, amount: f64) {
-        self.disaster_rate = amount;
     }
 }
 
@@ -86,84 +59,16 @@ impl Simulation {
         Simulation { config }
     }
     pub fn simulate(&mut self) -> String {
-        let mut cancered: isize = self.config.people_with_cancer;
-        let mut rng = rand::thread_rng();
-        let mut population = self.config.base;
-        let mut leap = 1;
+        // load the config
+        let config = &self.config;
 
-        // Year tracking
-        let mut yss = 0;
-        // Years since start
+        // now we calculate death rates for each scenario
 
-        for _year in 0..self.config.years {
-            if population > 0 {
-                let death_percentage = self.config.death_rate * population as f64;
-                let mut deaths = 0;
+        let cardiovacular_disease_rate = 0.1;
 
-                for _person in 0..population {
-                    let death = rng.gen_range(0.0..100000.0);
-                    if death < death_percentage {
-                        deaths += 1;
-                    }
-                }
-
-                for _cancerererererererere in 0..self.config.people_with_cancer.clone() {
-                    let rand: f64 = rng.gen_range(0..=100) as f64;
-                    if rand < self.config.cancer_recovery_rate {
-                        self.config.people_with_cancer -= 1;
-                    }
-                    let rand: f64 = rng.gen_range(0..=100) as f64;
-                    if rand < self.config.cancer_death_rate {
-                        population -= 1;
-                        self.config.people_with_cancer -= 1;
-                    }
-                }
-
-                // Give people cancer
-                let new_people =
-                    (self.config.cancer_rate / 100.0 * population as f64).floor() as isize;
-
-                cancered += new_people;
-                self.config.people_with_cancer += new_people;
-
-                // Potential disaster
-
-                let disaster = rng.gen_range(0.0..100.0);
-                if disaster < self.config.disaster_rate {
-                    let deaths: f64 = population as f64 / rng.gen_range(1..10) as f64;
-                    population -= deaths.floor() as isize;
-                    self.config.disasters += 1;
-                }
-
-                population -= deaths;
-
-                let addition: isize = (self.config.birth_rate * population as f64).floor() as isize;
-                population += addition;
-
-                leap += 1;
-                if leap == 4 {
-                    leap = 1;
-                }
-                yss += 1;
-            }
-        }
-        serde_json::to_string_pretty(&serde_json::json!(
-            {
-                "end": {
-                    "population": population,
-                    "cancer": self.config.people_with_cancer,
-                },
-                "total": {
-                    "cancer": cancered,
-                    "disasters": self.config.disasters,
-                },
-            }
-        ))
+        serde_json::to_string_pretty(&serde_json::json!({
+            "loaded": true
+        }))
         .unwrap()
     }
-}
-
-#[wasm_bindgen]
-pub fn greet(name: &str) {
-    alert(&format!("Hello, {}!", name));
 }
