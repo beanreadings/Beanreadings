@@ -226,7 +226,7 @@ pub struct SimulationConfig {
     diet_settings: Diet,
     habit_settings: Habits,
     years: u64,
-    population: u128,
+    population: u64,
 }
 
 impl Default for SimulationConfig {
@@ -243,9 +243,17 @@ impl Default for SimulationConfig {
 #[wasm_bindgen]
 impl SimulationConfig {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> SimulationConfig {
+    pub fn new(
+        diet_settings: Diet,
+        habit_settings: Habits,
+        years: u64,
+        population: u64,
+    ) -> SimulationConfig {
         SimulationConfig {
-            ..SimulationConfig::default()
+            diet_settings,
+            habit_settings,
+            years,
+            population: population as u64,
         }
     }
 }
@@ -267,7 +275,7 @@ impl Simulation {
 
         let mut population = config.population;
 
-        let mut population_curve: Vec<u128> = vec![population];
+        let mut population_curve: Vec<u64> = vec![population];
 
         let mut log: Vec<String> = vec![];
 
@@ -281,6 +289,7 @@ impl Simulation {
         // now we simulate every person in the population
 
         for i in 0..config.years {
+            println!("Working on year {}", i);
             // this is your average joe, so now we have to calculate whats gonna happen to him
 
             // first, a random disaster chance, like a meteor hitting the earth, or a nuclear war
@@ -312,7 +321,7 @@ impl Simulation {
                         let deaths = rng.gen_range(90..99);
                         let rate = deaths as f64 / 100.0;
 
-                        population -= (population as f64 * rate).ceil() as u128;
+                        population -= (population as f64 * rate).ceil() as u64;
 
                         log.push(format!(
                             "Year {}: A meteor has hit the earth, {}% of the population has died",
@@ -327,7 +336,7 @@ impl Simulation {
                         let deaths = rng.gen_range(50..90);
                         let rate = deaths as f64 / 100.0;
 
-                        population -= (population as f64 * rate).ceil() as u128;
+                        population -= (population as f64 * rate).ceil() as u64;
 
                         log.push(format!(
                             "Year {}: A nuclear war has occured, {}% of the population has died",
@@ -341,7 +350,7 @@ impl Simulation {
                         let deaths = rng.gen_range(30..50);
                         let rate = deaths as f64 / 100.0;
 
-                        population -= (population as f64 * rate).ceil() as u128;
+                        population -= (population as f64 * rate).ceil() as u64;
 
                         log.push(format!(
                             "Year {}: Global warming has caused a famine, {}% of the population has died",
@@ -358,7 +367,7 @@ impl Simulation {
                         let deaths = rng.gen_range(20..30);
                         let rate = deaths as f64 / 100.0;
 
-                        population -= (population as f64 * rate).ceil() as u128;
+                        population -= (population as f64 * rate).ceil() as u64;
 
                         log.push(format!(
                             "Year {}: A pandemic has occured, {}% of the population has died",
@@ -375,7 +384,7 @@ impl Simulation {
                         let deaths = rng.gen_range(1..20);
                         let rate = deaths as f64 / 100.0;
 
-                        population -= (population as f64 * rate).ceil() as u128;
+                        population -= (population as f64 * rate).ceil() as u64;
 
                         log.push(format!(
                             "Year {}: A natural disaster has occured, {}% of the population has died",
@@ -388,14 +397,33 @@ impl Simulation {
 
             let old_population = population;
 
-            population *= (1.0f64 + (birth_rate / 100.0f64)).ceil() as u128;
+            println!("Old population: {}", old_population);
+
+            println!("Birth rate: {}", birth_rate);
+
+            population = (population as f64 * (1.0f64 + (birth_rate / 100.0f64))).ceil() as u64;
+
+            println!("New population: {}", population);
 
             // as you theoretically have less people, the birth rate should decrease, and the death rate should increase
-            birth_rate += birth_rate_change;
+
+            // first detect for a negative/positive birth rate
+
+            if birth_rate_change > 0.0 {
+                birth_rate += birth_rate_change;
+            } else {
+                // check to make sure the birth rate isnt too low
+
+                if birth_rate < 1.0 {
+                    birth_rate_change += 0.1;
+                } else {
+                    birth_rate += birth_rate_change;
+                }
+            }
 
             // we adjust the median age of the population
 
-            let births = population * (1.0f64 + (birth_rate / 100.0f64)).ceil() as u128;
+            let births = population * (1.0f64 + (birth_rate / 100.0f64)).ceil() as u64;
 
             // so we calculate the median age of the population
 
@@ -428,95 +456,134 @@ impl Simulation {
                 // however as a base rate we will use 0.2% and then add some modifiers such as the
                 // habit and diet
 
-                let mut cardiovascular_disease_rate = 0.2;
-
                 // now we calculate diet and habit modifiers
 
-                let calcium = rng.gen_range(
-                    (config.diet_settings.calcium - 0.5)..(config.diet_settings.calcium + 0.5),
-                );
+                let calcium = rng
+                    .gen_range(
+                        (config.diet_settings.calcium - 0.5)..(config.diet_settings.calcium + 0.5),
+                    )
+                    .abs();
 
-                let sugar = rng.gen_range(
-                    (config.diet_settings.sugar - 0.5)..(config.diet_settings.sugar + 0.5),
-                );
+                let sugar = rng
+                    .gen_range(
+                        (config.diet_settings.sugar - 0.5)..(config.diet_settings.sugar + 0.5),
+                    )
+                    .abs();
 
-                let solid_fats = rng.gen_range(
-                    (config.diet_settings.solid_fats - 0.5)
-                        ..(config.diet_settings.solid_fats + 0.5),
-                );
+                let solid_fats = rng
+                    .gen_range(
+                        (config.diet_settings.solid_fats - 0.5)
+                            ..(config.diet_settings.solid_fats + 0.5),
+                    )
+                    .abs();
 
-                let salt = rng.gen_range(
-                    (config.diet_settings.salt - 0.5)..(config.diet_settings.salt + 0.5),
-                );
+                let salt = rng
+                    .gen_range((config.diet_settings.salt - 0.5)..(config.diet_settings.salt + 0.5))
+                    .abs();
 
-                let fibre = rng.gen_range(
-                    (config.diet_settings.fibre - 0.5)..(config.diet_settings.fibre + 0.5),
-                );
+                let fibre = rng
+                    .gen_range(
+                        (config.diet_settings.fibre - 0.5)..(config.diet_settings.fibre + 0.5),
+                    )
+                    .abs();
 
-                let smoking = rng.gen_range(
-                    (config.habit_settings.smoking - 0.5)..(config.habit_settings.smoking + 0.5),
-                );
+                let smoking = rng
+                    .gen_range(
+                        (config.habit_settings.smoking - 0.5)
+                            ..(config.habit_settings.smoking + 0.5),
+                    )
+                    .abs();
 
-                let alcohol = rng.gen_range(
-                    (config.habit_settings.alcohol - 0.5)..(config.habit_settings.alcohol + 0.5),
-                );
+                let alcohol = rng
+                    .gen_range(
+                        (config.habit_settings.alcohol - 0.5)
+                            ..(config.habit_settings.alcohol + 0.5),
+                    )
+                    .abs();
 
-                let binge_drinking = rng.gen_range(
-                    (config.habit_settings.binge_drinking - 0.5)
-                        ..(config.habit_settings.binge_drinking + 0.5),
-                );
+                let binge_drinking = rng
+                    .gen_range(
+                        (config.habit_settings.binge_drinking - 0.5)
+                            ..(config.habit_settings.binge_drinking + 0.5),
+                    )
+                    .abs();
 
-                let vaping = rng.gen_range(
-                    (config.habit_settings.vaping - 0.5)..(config.habit_settings.vaping + 0.5),
-                );
+                let vaping = rng
+                    .gen_range(
+                        (config.habit_settings.vaping - 0.5)..(config.habit_settings.vaping + 0.5),
+                    )
+                    .abs();
 
-                let exercise = rng.gen_range(
-                    (config.habit_settings.exercise - 0.5)..(config.habit_settings.exercise + 0.5),
-                );
+                let exercise = rng
+                    .gen_range(
+                        (config.habit_settings.exercise - 0.5)
+                            ..(config.habit_settings.exercise + 0.5),
+                    )
+                    .abs();
 
-                let sleep = rng.gen_range(
-                    (config.habit_settings.sleep - 0.5)..(config.habit_settings.sleep + 0.5),
-                );
+                let sleep = rng
+                    .gen_range(
+                        (config.habit_settings.sleep - 0.5)..(config.habit_settings.sleep + 0.5),
+                    )
+                    .abs();
 
-                let hydration = rng.gen_range(
-                    (config.habit_settings.hydration - 0.5)
-                        ..(config.habit_settings.hydration + 0.5),
-                );
+                let hydration = rng
+                    .gen_range(
+                        (config.habit_settings.hydration - 0.5)
+                            ..(config.habit_settings.hydration + 0.5),
+                    )
+                    .abs();
 
-                let anti_vaccination = rng.gen_range(
-                    (config.habit_settings.anti_vaccination - 0.5)
-                        ..(config.habit_settings.anti_vaccination + 0.5),
-                );
+                let anti_vaccination = rng
+                    .gen_range(
+                        (config.habit_settings.anti_vaccination - 0.5)
+                            ..(config.habit_settings.anti_vaccination + 0.5),
+                    )
+                    .abs();
 
-                let drugs = rng.gen_range(
-                    (config.habit_settings.drugs - 0.5)..(config.habit_settings.drugs + 0.5),
-                );
+                let drugs = rng
+                    .gen_range(
+                        (config.habit_settings.drugs - 0.5)..(config.habit_settings.drugs + 0.5),
+                    )
+                    .abs();
 
                 // diet modifiers
+
+                let mut cardiovascular_disease_rate = 0.2;
 
                 // if sugar == 1 then we add no modifier, otherwise subtract
                 // we add 0.02 per 0.1 sugar, so if sugar is 0.5, we add 0.1 to the rate
 
-                cardiovascular_disease_rate += ((sugar - 1.0) * 10.0) * 0.2;
+                if sugar > 1.0 {
+                    cardiovascular_disease_rate += ((sugar - 1.0) * 10.0) * 0.02;
+                }
 
                 // solid fats also have a **HUGE** effect on cardiovascular disease
 
                 // trans fats have a HUGE effect on cardiovascular disease, so we add 0.2 per 0.1
                 // same as sugar but arguably trans fats are worse
-                cardiovascular_disease_rate += ((solid_fats - 1.0) * 10.0) * 0.2;
+                if solid_fats > 1.0 {
+                    cardiovascular_disease_rate += ((solid_fats - 1.0) * 10.0) * 0.02;
+                }
 
                 // salt has a moderate effect on cardiovascular disease, so we add 0.1 per 0.1
                 // salt
 
-                cardiovascular_disease_rate += ((salt - 1.0) * 10.0) * 0.1;
+                if salt > 1.0 {
+                    cardiovascular_disease_rate += ((salt - 1.0) * 10.0) * 0.01;
+                }
 
                 // fibre helps prevent cardiovascular disease, so we subtract 0.1 per 0.1 fibre
 
-                cardiovascular_disease_rate -= ((fibre - 1.0) * 10.0) * 0.1;
+                if fibre > 1.0 {
+                    cardiovascular_disease_rate -= ((fibre - 1.0) * 10.0) * 0.01;
+                }
 
                 // smoking = cardiovascular disease, so we add 0.2 per 0.1 smoking
 
-                cardiovascular_disease_rate += ((smoking - 1.0) * 10.0) * 0.2;
+                if smoking > 1.0 {
+                    cardiovascular_disease_rate += ((smoking - 1.0) * 10.0) * 0.02;
+                }
 
                 // alcohol doesnt have a huge effect on cardiovascular disease, but it does have an
                 // effect, so we add 0.1 per 0.1 alcohol. sometimes it can be good for you, but
@@ -525,37 +592,251 @@ impl Simulation {
                 if smoking < 1.0 {
                     cardiovascular_disease_rate -= 0.02;
                 } else {
-                    cardiovascular_disease_rate += ((alcohol - 1.0) * 10.0) * 0.1;
+                    cardiovascular_disease_rate += ((alcohol - 1.0) * 10.0) * 0.01;
                 }
 
                 // binge drinking is very bad for you, so we add 0.2 per 0.1 binge drinking
 
-                cardiovascular_disease_rate += ((binge_drinking - 1.0) * 10.0) * 0.2;
+                if binge_drinking > 1.0 {
+                    cardiovascular_disease_rate += ((binge_drinking - 1.0) * 10.0) * 0.02;
+                }
 
                 // vaping is bad for you, so we add 0.1 per 0.1 vaping
 
-                cardiovascular_disease_rate += ((vaping - 1.0) * 10.0) * 0.1;
+                if vaping > 1.0 {
+                    cardiovascular_disease_rate += ((vaping - 1.0) * 10.0) * 0.01;
+                }
 
                 // exercise is good for you, so we subtract 0.1 per 0.1 exercise
 
-                cardiovascular_disease_rate -= ((exercise - 1.0) * 10.0) * 0.1;
+                if exercise > 1.0 {
+                    cardiovascular_disease_rate -= ((exercise - 1.0) * 10.0) * 0.01;
+                }
 
                 // sleep only has an effect if you dont get enough, so we add 0.1 per 0.1 sleep
 
-                if sleep > 0.5 {
-                    cardiovascular_disease_rate += 0.1;
+                if sleep < 0.5 {
+                    cardiovascular_disease_rate += 0.01;
                 }
 
                 // drugs are bad for you, so we add 0.2 per 0.1 drugs
 
-                cardiovascular_disease_rate += ((drugs - 1.0) * 10.0) * 0.2;
-
-                cardiovascular_disease_rate *= 100.0; // should now be in a format like 5
+                if drugs > 1.0 {
+                    cardiovascular_disease_rate += ((drugs - 1.0) * 10.0) * 0.02;
+                }
 
                 let chance = rng.gen_range(0.0..100.0) as f64;
 
                 if chance < cardiovascular_disease_rate {
                     population -= 1;
+                    continue;
+                }
+
+                // now we calculate the death rate for cancers
+
+                let mut cancer_rate = 0.13;
+
+                // solid fats effect several types of cancer, so we add 0.2 per 0.1 solid fats
+
+                if solid_fats > 1.0 {
+                    cancer_rate += ((solid_fats - 1.0) * 10.0) * 0.02;
+                }
+
+                // salt can cause cancer, so we add 0.1 per 0.1 salt
+
+                if salt > 1.0 {
+                    cancer_rate += ((salt - 1.0) * 10.0) * 0.01;
+                }
+
+                // smoking causes lung cancer, so we add 0.2 per 0.1 smoking
+
+                if smoking > 1.0 {
+                    cancer_rate += ((smoking - 1.0) * 10.0) * 0.02;
+                }
+
+                // alcohol can cause cancer, so we add 0.1 per 0.1 alcohol
+
+                if alcohol > 1.0 {
+                    cancer_rate += ((alcohol - 1.0) * 10.0) * 0.01;
+                }
+
+                // binge drinking can cause cancer, so we add 0.2 per 0.1 binge drinking
+
+                if binge_drinking > 1.0 {
+                    cancer_rate += ((binge_drinking - 1.0) * 10.0) * 0.02;
+                }
+
+                // vaping can cause cancer, so we add 0.1 per 0.1 vaping
+
+                if vaping > 1.0 {
+                    cancer_rate += ((vaping - 1.0) * 10.0) * 0.01;
+                }
+
+                // now we calculate the likelihood of dying from cancer
+
+                let chance = rng.gen_range(0.0..100.0) as f64;
+
+                if chance < cancer_rate {
+                    // bro died from cancer
+                    population -= 1;
+                    continue;
+                }
+
+                // respitory diseases
+
+                let mut respitory_rate = 0.05;
+
+                // smoking causes respitory diseases, so we add 0.2 per 0.1 smoking
+
+                if smoking > 1.0 {
+                    respitory_rate += ((smoking - 1.0) * 10.0) * 0.02;
+                }
+
+                // vaping can cause respitory diseases, so we add 0.1 per 0.1 vaping
+
+                if vaping > 1.0 {
+                    respitory_rate += ((vaping - 1.0) * 10.0) * 0.01;
+                }
+
+                // now we calculate the likelihood of dying from respitory diseases
+
+                let chance = rng.gen_range(0.0..100.0) as f64;
+
+                if chance < respitory_rate {
+                    // bro died from respitory diseases
+                    population -= 1;
+                    continue;
+                }
+
+                // now we calculate the likelihood of dying from digestive diseases
+
+                let mut digestive_rate = 0.02;
+
+                // solid fats can cause digestive diseases, so we add 0.1 per 0.1 solid fats
+
+                if solid_fats > 1.0 {
+                    digestive_rate += ((solid_fats - 1.0) * 10.0) * 0.01;
+                }
+
+                // salt can cause digestive diseases, so we add 0.1 per 0.1 salt
+
+                if salt > 1.0 {
+                    digestive_rate += ((salt - 1.0) * 10.0) * 0.01;
+                }
+
+                // now we calculate the likelihood of dying from digestive diseases
+
+                let chance = rng.gen_range(0.0..100.0) as f64;
+
+                if chance < digestive_rate {
+                    // bro died from digestive diseases
+                    population -= 1;
+                    continue;
+                }
+
+                // who dies from lower respitory infections
+
+                let mut lower_respitory_rate = 0.01;
+
+                // smoking causes lower respitory infections, so we add 0.1 per 0.1 smoking
+                // the reason for lower modifiers now, is because all of these cauess of death are
+                // lower and less common
+
+                if smoking > 1.0 {
+                    lower_respitory_rate += ((smoking - 1.0) * 10.0) * 0.01;
+                }
+
+                // vaping can cause lower respitory infections, so we add 0.1 per 0.1 vaping
+
+                if vaping > 1.0 {
+                    lower_respitory_rate += ((vaping - 1.0) * 10.0) * 0.01;
+                }
+
+                // now we calculate the likelihood of dying from lower respitory infections
+
+                let chance = rng.gen_range(0.0..100.0) as f64;
+
+                if chance < lower_respitory_rate {
+                    // bro died from lower respitory infections
+                    population -= 1;
+                    continue;
+                }
+
+                // neonatal disease
+
+                if age < 3 {
+                    // neonatal disease kills millions of babies every year, so we have to account
+                    // for that
+
+                    let neonatal_rate = 20; // 20% of babies die from neonatal disease. Rest
+                                            // assured, my flawed age generator will not generate many babies, but they
+                                            // will all have a 20% chance of dying
+
+                    let chance = rng.gen_range(0..100);
+
+                    if chance < neonatal_rate {
+                        // bro died from neonatal disease
+                        population -= 1;
+                        continue;
+                    }
+                }
+
+                // dimentia kills people
+
+                if age > 65 {
+                    // dimentia is a common cause of death in the elderly, so we have to account for
+                    // that
+
+                    let dimentia_rate = 5; // 5% of people die from dimentia
+
+                    let chance = rng.gen_range(0..100);
+
+                    if chance < dimentia_rate {
+                        // bro died from dimentia
+                        population -= 1;
+                        continue;
+                    }
+                }
+
+                // next cycle lol
+
+                let death_rate = cardiovascular_disease_rate
+                    + cancer_rate
+                    + respitory_rate
+                    + digestive_rate
+                    + lower_respitory_rate;
+
+                /*println!("Birth rate: {}, Death rate: {}", birth_rate, death_rate);
+
+                println!(
+                    "Cardiovascular disease rate: {}",
+                    cardiovascular_disease_rate
+                );
+                println!("Cancer rate: {}", cancer_rate);
+                println!("Respitory rate: {}", respitory_rate);
+                println!("Digestive rate: {}", digestive_rate);
+                println!("Lower respitory rate: {}", lower_respitory_rate);
+
+                println!("Calcium: {}", calcium);
+                println!("Sugar: {}", sugar);
+                println!("Solid fats: {}", solid_fats);
+                println!("Fibre: {}", fibre);
+                println!("Salt: {}", salt);
+
+                println!("Smoking: {}", smoking);
+                println!("Alcohol: {}", alcohol);
+                println!("Binge drinking: {}", binge_drinking);
+                println!("Vaping: {}", vaping);
+                println!("Exercise: {}", exercise);
+
+                println!("Age: {}", age);
+
+                std::thread::sleep(std::time::Duration::from_secs_f64(1.5));*/
+
+                if death_rate > birth_rate {
+                    // we increase the median age of the population
+
+                    median_age += (death_rate - birth_rate) / 100.0;
                 }
             }
             population_curve.push(population);
@@ -588,5 +869,28 @@ impl Simulation {
 
         }))
         .unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_simul() {
+        let food = Diet::default();
+
+        let habits = Habits::default();
+
+        let config = SimulationConfig {
+            diet_settings: food,
+            habit_settings: habits,
+            years: 10,
+            population: 1000,
+        };
+
+        let mut simulation = Simulation::new(config);
+
+        simulation.simulate();
     }
 }

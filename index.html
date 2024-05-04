@@ -1,48 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
-<head>
+  <head>
     <title>Simulation</title>
     <script src="index.js" type="module"></script>
     <script type="module">
-        import {simulate} from "./index.js";
-        window.simulate = simulate;
+      import { simulate } from "./index.js";
+      window.simulate = simulate;
     </script>
     <style>
-        body {
-            font-family: Arial;
-        }
+      body {
+        font-family: Arial;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <h1>Simulations</h1>
     <p>Project for Science Talent Quest</p>
-    <label for="cancer_rate">Cancer Rate (%):</label>
-    <input type="number" min="0" max="99" step="0.1" id="cancer_rate" value="10" />
-    <br />
-    <label for="cancer_death">Cancer Death Rate (%):</label>
-    <input type="number" min="0" max="99" step="0.1" id="cancer_death" value="20" />
-    <br />
-    <label for="base">Base Population:</label>
-    <input type="number" min="0" id="base" value="1000" />
-    <br />
-    <label for="years">Years:</label>
-    <input type="number" min="0" id="years" value="10" />
-    <br />
-    <label for="death_rate">Death Rate:</label>
-    <input type="number" min="0" id="death_rate" value="0.0185" step="0.0001" />
-    <br />
-    <label for="birth_rate">Birth Rate:</label>
-    <input type="number" min="0" id="birth_rate" value="0.037" step="0.0001" />
-    <br />
-    <label for="disaster_rate">Disaster Rate:</label>
-    <input type="number" min="0" max="00" id="disaster_rate" value="1" step="0.1" />
-    <br />
-    <br />
     <button onclick="simulate()">Simulate</button>
     <br />
     <p id="result"></p>
-</body>
-
+  </body>
 </html>

@@ -1,21 +1,37 @@
-import init, { Simulation, SimulationConfig } from "./simulation.js";
+import init, {
+  Simulation,
+  SimulationConfig,
+  Habits,
+  Diet,
+} from "./simulation.js";
 await init();
 export function simulate() {
-    let cancer_death = document.getElementById("cancer_death").value;
-    let base = document.getElementById("base").value;
-    let cancer_rate = document.getElementById("cancer_rate").value;
-    let years = document.getElementById("years").value;
-    let death_rate = document.getElementById("death_rate").value;
-    let birth_rate = document.getElementById("birth_rate").value;
-    let disaster_rate = document.getElementById("disaster_rate").value;
-    let config = new SimulationConfig();
-    config.cancer_death_rate(cancer_death);
-    config.cancer_rate(cancer_rate);
-    config.base_population(base);
-    config.years(years);
-    config.death_rate(death_rate);
-    config.birth_rate(birth_rate);
-    config.disaster_rate(disaster_rate);
-    let simulation = new Simulation(config).simulate();
-    document.getElementById("result").innerHTML = simulation;
+  // we do stuff
+
+  console.log("Attempting to simulate");
+
+  let food = new Diet(1.0, 2.0, 1.5, 0.6, 1.5);
+
+  console.log("Food: ", food);
+
+  let habits = new Habits(0.23, 0.52, 0.23, 0.05, 0.55, 0.63, 0.25, 0.05, 0.13);
+
+  console.log("Habits: ", habits);
+
+  let simulation_config = new SimulationConfig(
+    food,
+    habits,
+    BigInt(10),
+    BigInt(1000),
+  );
+
+  console.log("Simulation Config: ", simulation_config);
+
+  let simulation = new Simulation(simulation_config);
+
+  console.log("Simulation: ", simulation);
+
+  let result = simulation.simulate();
+
+  document.getElementById("result").innerHTML = result;
 }
