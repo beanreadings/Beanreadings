@@ -10,6 +10,7 @@
 //! Beanreadings helps us understand the future death rate by simulating different scenarios.
 use rand::Rng;
 use wasm_bindgen::prelude::*;
+use web_sys::{window, Headers, Request, RequestInit, Response};
 
 // my custom cool normal distribution function stuff that i made
 
@@ -253,7 +254,7 @@ impl SimulationConfig {
             diet_settings,
             habit_settings,
             years,
-            population: population as u64,
+            population,
         }
     }
 }
@@ -458,7 +459,7 @@ impl Simulation {
 
                 // now we calculate diet and habit modifiers
 
-                let calcium = rng
+                let _calcium = rng
                     .gen_range(
                         (config.diet_settings.calcium - 0.5)..(config.diet_settings.calcium + 0.5),
                     )
@@ -527,14 +528,14 @@ impl Simulation {
                     )
                     .abs();
 
-                let hydration = rng
+                let _hydration = rng
                     .gen_range(
                         (config.habit_settings.hydration - 0.5)
                             ..(config.habit_settings.hydration + 0.5),
                     )
                     .abs();
 
-                let anti_vaccination = rng
+                let _anti_vaccination = rng
                     .gen_range(
                         (config.habit_settings.anti_vaccination - 0.5)
                             ..(config.habit_settings.anti_vaccination + 0.5),
