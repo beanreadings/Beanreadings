@@ -14,3 +14,22 @@ This project is a work in progress, and we are constantly updating it with new d
 # The rust code
 
 The code that is written in Rust is highly-optimized, and compiled to WebAssembly. However, to ensure that the simulations are accurate, we iterate over each human in the simulation. For small population counts, this will not matter, but the time complexity will be around O(population * N), which will scale depending on the population, really badly. Therefore, the code is written to have accurate predictions, but will take a while. This is why we use our custom neural network to detect beforehand.
+
+# Beanreadings Neural Network (BRNN)
+
+BRNN is run in Rust, for maximum performance whilst being trained in PyTorch. The neural network is trained on synthetic data that I have generated and is used to predict the results *before* the simulation is ran.<br>
+This is effective for the following reasons:
+- The neural network can predict the results of the simulation before it is ran, and can be used to detect any errors in the simulation code.
+- Much, much faster than the simulation code, while having a similar accuracy.
+- Can be used to detect any errors in the simulation code, and can be used to detect any errors in the simulation code.
+
+## Architecture
+BRNN has:<br>
+- 1 input layer, with 16 neurons (Calcium intake, Smoking percentage, Years, etc...)
+- 3 hidden layers, with 48 neurons each
+- 1 output layer, with 1 neuron (Population growth)
+
+We have trained BRNN over 1000 epochs, with a learning rate of 0.01, and a batch size of 32. The loss function is Mean Squared Error, and the optimizer is Adam. The weights are available on our GitHub repository.
+
+## Accuracy
+BRNN has a loss of around 0.05, which is very good for a neural network of this size. The synthetic data is generated from the simulation itself, and thus creates a very accurate model of the simulation.
