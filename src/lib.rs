@@ -281,10 +281,19 @@ impl Simulation {
 
         let mut rng = rand::thread_rng();
 
-        let mut birth_rate = 3.0;
-        let mut birth_rate_change = -0.1;
+        let mut asfrs = [
+            (15..20, 35.0),
+            (20..25, 105.0),
+            (25..30, 145.0),
+            (30..35, 125.0),
+            (35..40, 75.0),
+            (40..45, 35.0),
+            (45..50, 25.0),
+        ];
 
         let mut median_age = 30.8;
+
+        let mut bonus_rate = 1.05; // near the beginning, increase the birth rate
 
         // now we simulate every person in the population
 
@@ -395,39 +404,51 @@ impl Simulation {
                 }
             }
 
-            let old_population = population;
+            // generally the cost of having a child is increasing, so we have to account for that
 
-            println!("Old population: {}", old_population);
-
-            println!("Birth rate: {}", birth_rate);
-
-            population = (population as f64 * (1.0f64 + (birth_rate / 100.0f64))).ceil() as u64;
-
-            println!("New population: {}", population);
-
-            // as you theoretically have less people, the birth rate should decrease, and the death rate should increase
-
-            // first detect for a negative/positive birth rate
-
-            if birth_rate_change > 0.0 {
-                birth_rate += birth_rate_change;
-            } else {
-                // check to make sure the birth rate isnt too low
-
-                if birth_rate < 1.0 {
-                    birth_rate_change += 0.1;
-                } else {
-                    birth_rate += birth_rate_change;
+            for asfr in asfrs.iter_mut() {
+                if asfr.1 > 1.0 {
+                    asfr.1 -= 0.1;
                 }
             }
 
-            // we adjust the median age of the population
+            if bonus_rate > 1.0 {
+                population = (population as f64 * bonus_rate).ceil() as u64;
+            }
 
-            let births = population * (1.0f64 + (birth_rate / 100.0f64)).ceil() as u64;
+            bonus_rate -= 0.01; // decrease the birth rate
+
+            // we increase the population early
+
+            let mut births = 0;
+
+            for _ in 0..population {
+                let female = rng.gen_bool(0.5);
+
+                if female {
+                    let age = generate_age(median_age) - 5; // hard coded weight
+
+                    for asfr in asfrs.iter() {
+                        if asfr.0.contains(&age) {
+                            let birth_chance = (asfr.1 / 1000.0f64) * 100.0; // 2 / 1000 = 0.002,
+
+                            let chance = rng.gen_range(0.0..100.0);
+
+                            if birth_chance > chance {
+                                births += 1;
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            let birth_rate = births as f64 / population as f64;
+
+            population += births;
 
             // so we calculate the median age of the population
-
-            median_age = (median_age * old_population as f64 + births as f64) / population as f64;
 
             // median age should be lower than it was before this, but it will be significantly
             // increased after we calculate the deaths
@@ -435,6 +456,8 @@ impl Simulation {
             // now that we have had our disaster chance, we can calculate the average joe's death
 
             // first, we calculate the death chances for everything
+
+            let mut deaths = 0;
 
             for _ in 0..population {
                 // we calculate their age
@@ -629,6 +652,7 @@ impl Simulation {
 
                 if chance < cardiovascular_disease_rate {
                     population -= 1;
+                    deaths += 1;
                     continue;
                 }
 
@@ -679,6 +703,7 @@ impl Simulation {
                 if chance < cancer_rate {
                     // bro died from cancer
                     population -= 1;
+                    deaths += 1;
                     continue;
                 }
 
@@ -705,6 +730,7 @@ impl Simulation {
                 if chance < respitory_rate {
                     // bro died from respitory diseases
                     population -= 1;
+                    deaths += 1;
                     continue;
                 }
 
@@ -731,6 +757,7 @@ impl Simulation {
                 if chance < digestive_rate {
                     // bro died from digestive diseases
                     population -= 1;
+                    deaths += 1;
                     continue;
                 }
 
@@ -759,12 +786,14 @@ impl Simulation {
                 if chance < lower_respitory_rate {
                     // bro died from lower respitory infections
                     population -= 1;
+                    deaths += 1;
                     continue;
                 }
 
                 // neonatal disease
 
-                if age < 3 {
+                if age < 10 {
+                    // up to 10 because the age generator rarely generates babies
                     // neonatal disease kills millions of babies every year, so we have to account
                     // for that
 
@@ -777,6 +806,7 @@ impl Simulation {
                     if chance < neonatal_rate {
                         // bro died from neonatal disease
                         population -= 1;
+                        deaths += 1;
                         continue;
                     }
                 }
@@ -794,51 +824,22 @@ impl Simulation {
                     if chance < dimentia_rate {
                         // bro died from dimentia
                         population -= 1;
+                        deaths += 1;
                         continue;
                     }
                 }
 
                 // next cycle lol
-
-                let death_rate = cardiovascular_disease_rate
-                    + cancer_rate
-                    + respitory_rate
-                    + digestive_rate
-                    + lower_respitory_rate;
-
-                /*println!("Birth rate: {}, Death rate: {}", birth_rate, death_rate);
-
-                println!(
-                    "Cardiovascular disease rate: {}",
-                    cardiovascular_disease_rate
-                );
-                println!("Cancer rate: {}", cancer_rate);
-                println!("Respitory rate: {}", respitory_rate);
-                println!("Digestive rate: {}", digestive_rate);
-                println!("Lower respitory rate: {}", lower_respitory_rate);
-
-                println!("Calcium: {}", calcium);
-                println!("Sugar: {}", sugar);
-                println!("Solid fats: {}", solid_fats);
-                println!("Fibre: {}", fibre);
-                println!("Salt: {}", salt);
-
-                println!("Smoking: {}", smoking);
-                println!("Alcohol: {}", alcohol);
-                println!("Binge drinking: {}", binge_drinking);
-                println!("Vaping: {}", vaping);
-                println!("Exercise: {}", exercise);
-
-                println!("Age: {}", age);
-
-                std::thread::sleep(std::time::Duration::from_secs_f64(1.5));*/
-
-                if death_rate > birth_rate {
-                    // we increase the median age of the population
-
-                    median_age += (death_rate - birth_rate) / 100.0;
-                }
             }
+
+            let death_rate = deaths as f64 / population as f64;
+
+            if death_rate > birth_rate {
+                // we increase the median age of the population
+
+                median_age += (death_rate - birth_rate) / 100.0;
+            }
+
             population_curve.push(population);
         }
 
@@ -866,6 +867,7 @@ impl Simulation {
             },
             "log": log,
             "population_curve": population_curve,
+            "median_age": median_age,
 
         }))
         .unwrap()
