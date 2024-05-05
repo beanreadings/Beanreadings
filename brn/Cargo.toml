@@ -7,4 +7,8 @@ edition = "2021"
 
 [dependencies]
 errorfunctions = "0.2.0"
+kdam = "0.5.1"
 rand = "0.8.5"
+
+[package.metadata.rustc-env]
+CARGO_TARGET_TRIPLE = "aarch64-apple-darwin"

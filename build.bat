@@ -1,7 +1,7 @@
 @Echo off
 del /s /q dist
 mkdir dist
-cargo build --release
+cargo build --release --target wasm32-unknown-unknown
 move target\wasm32-unknown-unknown\release\simulation.wasm dist\simulation.wasm
 wasm-bindgen dist\simulation.wasm --out-dir dist --target web
 copy index.html dist\index.html

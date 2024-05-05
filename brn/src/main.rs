@@ -6,7 +6,7 @@ mod beanreadings;
 
 use std::env;
 
-fn main() {
+fn main() -> Result<(), String> {
     let args = env::args().collect::<Vec<String>>();
 
     if args.contains(&String::from("-h")) || args.contains(&String::from("--help")) {
@@ -28,5 +28,10 @@ fn main() {
     } else if args.contains(&String::from("-v")) || args.contains(&String::from("--version")) {
         println!("Beanreadings Neural Network Project v0.1.0");
     } else if args.contains(&String::from("-d")) || args.contains(&String::from("--data")) {
+        beanreadings::generate_data()?;
+    } else {
+        println!("Beanreadings Neural Network Project");
+        println!("Use -h or --help for help");
     }
+    Ok(())
 }

@@ -1,3 +1,6 @@
+use std::io::{stdout, Write};
+
+use kdam::tqdm;
 use rand::Rng;
 
 pub struct NormalDistribution {
@@ -11,27 +14,6 @@ impl NormalDistribution {
             mean,
             standard_deviation,
         }
-    }
-
-    pub fn pdf(&self, x: f64) -> f64 {
-        // probability density function
-
-        // 1 / (σ * sqrt(2π)) * e^(-1/2 * ((x - μ) / σ)^2)
-
-        1.0 / (self.standard_deviation * (2.0 * std::f64::consts::PI).sqrt())
-            * (-0.5 * ((x - self.mean) / self.standard_deviation).powi(2)).exp()
-    }
-
-    pub fn cdf(&self, x: f64) -> f64 {
-        // cumulative density function
-
-        // 1/2 * (1 + erf((x - μ) / (σ * sqrt(2))))
-
-        1f64 / 2f64
-            * (1.0f64
-                + errorfunctions::RealErrorFunctions::erf(
-                    (x - self.mean) / (self.standard_deviation * (2.0f64).sqrt()),
-                ))
     }
 
     pub fn quartile(&self, x: f64) -> f64 {
@@ -50,7 +32,8 @@ fn generate_age(median: f64) -> u32 {
     loop {
         // standard deviation is 20 years, because most people live to around 80 years old
 
-        // i use my cool normal distribution function to generate the age of the person
+        // i use my cool normal distribution function to generate the age of the personbeandf
+        //
 
         // we have to generate a number between 0 and 1 to use with the CDF function
 
@@ -68,6 +51,7 @@ fn generate_age(median: f64) -> u32 {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Diet {
     // 1.00 = 100% of what we need, 0.50 = 50% of what we need
 
@@ -115,6 +99,7 @@ impl Diet {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Habits {
     // similar to diet, we assign them each a weight and what they corrolate to in the deaths category.
     // The weight will probably be calculated by something similar to Stochastic Gradient Descent
@@ -818,6 +803,124 @@ impl Simulation {
     }
 }
 
-fn generate_data() -> String {
+pub fn generate_data() -> Result<(), String> {
     println!("Generating data for training BRNN");
+
+    println!("Please decide on a sample size");
+    println!("BRN will generate sample size ^2 data points");
+    println!("BRN recommends a sample size of 1000");
+
+    println!();
+
+    let sample_size = loop {
+        print!("Sample Size: ");
+        stdout().flush().unwrap();
+        let mut input = String::new();
+        std::io::stdin().read_line(&mut input).unwrap();
+
+        if let Ok(data) = input.trim().parse::<u32>() {
+            break data;
+        }
+    };
+
+    // for this to have consistent data, we have to disable the random earthquakes/meteors etc
+    // so we have to set the disaster rate to 0
+
+    let mut diets: Vec<Diet> = vec![];
+
+    for _ in 0..sample_size {
+        let rand1 = rand::thread_rng().gen_range(0.1..3.0);
+        let rand2 = rand::thread_rng().gen_range(0.1..3.0);
+        let rand3 = rand::thread_rng().gen_range(0.1..3.0);
+        let rand4 = rand::thread_rng().gen_range(0.1..3.0);
+        let rand5 = rand::thread_rng().gen_range(0.1..3.0);
+
+        diets.push(Diet::new(rand1, rand2, rand3, rand4, rand5));
+    }
+
+    // so we do it randomly for 1000 different habits
+
+    let mut habits: Vec<Habits> = vec![];
+
+    let mut rng = rand::thread_rng();
+
+    for _ in 0..sample_size {
+        let rand1 = rng.gen_range(0.1..3.0);
+        let rand2 = rng.gen_range(0.1..3.0);
+        let rand3 = rng.gen_range(0.1..3.0);
+        let rand4 = rng.gen_range(0.1..3.0);
+        let rand5 = rng.gen_range(0.1..3.0);
+        let rand6 = rng.gen_range(0.1..3.0);
+        let rand7 = rng.gen_range(0.1..3.0);
+        let rand8 = rng.gen_range(0.1..3.0);
+        let rand9 = rng.gen_range(0.1..3.0);
+
+        habits.push(Habits::new(
+            rand1, rand2, rand3, rand4, rand5, rand6, rand7, rand8, rand9,
+        ));
+    }
+
+    // now we have to simulate the data
+
+    let mut data: Vec<(Diet, Habits, u64, u64, u128)> = vec![];
+    // diet, habits, years, start population, final population
+
+    for diet in tqdm!(diets.iter()) {
+        for habit in tqdm!(habits.iter()) {
+            let years = rng.gen_range(5..50);
+
+            let population = rng.gen_range(1000..10000);
+
+            let config = SimulationConfig::new(*diet, *habit, years, population);
+
+            let mut simulation = Simulation::new(config);
+
+            let mut population_curve = simulation.simulate();
+
+            data.push((
+                *diet,
+                *habit,
+                years,
+                population,
+                population_curve.pop().unwrap().into(),
+            ));
+        }
+    }
+
+    // now we open a buffer
+
+    let mut buffer = std::fs::File::create("data.csv").map_err(|e| e.to_string())?;
+
+    buffer.write_all(b"calcium,sugar,solid_fats,fibre,salt,smoking,alcohol,binge_drinking,vaping,exercise,sleep,hydration,anti_vaccination,drugs,years,population,final_population\n")
+        .map_err(|e| e.to_string())?;
+
+    for (diet, habit, years, population, final_population) in data.iter() {
+        buffer
+            .write_all(
+                format!(
+                    "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
+                    diet.calcium,
+                    diet.sugar,
+                    diet.solid_fats,
+                    diet.fibre,
+                    diet.salt,
+                    habit.smoking,
+                    habit.alcohol,
+                    habit.binge_drinking,
+                    habit.vaping,
+                    habit.exercise,
+                    habit.sleep,
+                    habit.hydration,
+                    habit.anti_vaccination,
+                    habit.drugs,
+                    years,
+                    population,
+                    final_population
+                )
+                .as_bytes(),
+            )
+            .map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
 }

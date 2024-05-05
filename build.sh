@@ -1,6 +1,6 @@
 rm -rf dist
 mkdir dist
-cargo build --release
+cargo build --release --target=wasm32-unknown-unknown
 mv target/wasm32-unknown-unknown/release/simulation.wasm dist/simulation.wasm
 wasm-bindgen dist/simulation.wasm --out-dir dist --target=web
 cp index.html dist/index.html

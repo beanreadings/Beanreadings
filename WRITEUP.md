@@ -33,3 +33,12 @@ We have trained BRNN over 1000 epochs, with a learning rate of 0.01, and a batch
 
 ## Accuracy
 BRNN has a loss of around 0.05, which is very good for a neural network of this size. The synthetic data is generated from the simulation itself, and thus creates a very accurate model of the simulation.
+
+## Visualization
+![BRNN](https://raw.githubusercontent.com/beanreadings/assets/main/nn.png)
+
+## Other Data
+- BRNN has 5569 parameters, very small for a neural network.
+- The neural network is trained on synthetic data, generated from the simulation itself.
+- It has been used to spot errors in the simulation code after updating it.
+- The neural network inference speed is around 0.0001 seconds, which is very fast. ***FIX THIS***
