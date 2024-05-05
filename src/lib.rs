@@ -10,7 +10,6 @@
 //! Beanreadings helps us understand the future death rate by simulating different scenarios.
 use rand::Rng;
 use wasm_bindgen::prelude::*;
-use web_sys::{window, Headers, Request, RequestInit, Response};
 
 // my custom cool normal distribution function stuff that i made
 
