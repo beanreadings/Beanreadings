@@ -26,7 +26,7 @@ This is effective for the following reasons:
 ## Architecture
 BRNN has:<br>
 - 1 input layer, with 16 neurons (Calcium intake, Smoking percentage, Years, etc...)
-- 3 hidden layers, with 48 neurons each
+- 5 hidden layers, with 48 neurons each
 - 1 output layer, with 1 neuron (Population growth)
 
 We have trained BRNN over 1000 epochs, with a learning rate of 0.01, and a batch size of 32. The loss function is Mean Squared Error, and the optimizer is Adam. The weights are available on our GitHub repository.

@@ -1,5 +1,6 @@
 /target
 /brn/target
-token.txt
+/brn/python/venv
+/brn/python/data.csv
 simulation.js
 /dist
