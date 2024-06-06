@@ -11,79 +11,10 @@
 use rand::Rng;
 use wasm_bindgen::prelude::*;
 
+mod age;
+mod types;
+
 // my custom cool normal distribution function stuff that i made
-
-#[wasm_bindgen]
-pub struct NormalDistribution {
-    mean: f64,
-    standard_deviation: f64,
-}
-
-#[wasm_bindgen]
-impl NormalDistribution {
-    #[wasm_bindgen(constructor)]
-    pub fn new(mean: f64, standard_deviation: f64) -> NormalDistribution {
-        NormalDistribution {
-            mean,
-            standard_deviation,
-        }
-    }
-
-    pub fn pdf(&self, x: f64) -> f64 {
-        // probability density function
-
-        // 1 / (σ * sqrt(2π)) * e^(-1/2 * ((x - μ) / σ)^2)
-
-        1.0 / (self.standard_deviation * (2.0 * std::f64::consts::PI).sqrt())
-            * (-0.5 * ((x - self.mean) / self.standard_deviation).powi(2)).exp()
-    }
-
-    pub fn cdf(&self, x: f64) -> f64 {
-        // cumulative density function
-
-        // 1/2 * (1 + erf((x - μ) / (σ * sqrt(2))))
-
-        1f64 / 2f64
-            * (1.0f64
-                + errorfunctions::RealErrorFunctions::erf(
-                    (x - self.mean) / (self.standard_deviation * (2.0f64).sqrt()),
-                ))
-    }
-
-    pub fn quartile(&self, x: f64) -> f64 {
-        // this is the inverse of the CDF function
-
-        // μ + σ * sqrt(2) * erf^(-1)(2 * x - 1)
-
-        self.mean
-            + self.standard_deviation
-                * (2.0f64).sqrt()
-                * errorfunctions::RealErrorFunctions::erfi(2.0 * x - 1.0)
-    }
-}
-
-fn generate_age(median: f64) -> u32 {
-    loop {
-        // standard deviation is 20 years, because most people live to around 80 years old
-
-        // i use my cool normal distribution function to generate the age of the person
-
-        // we have to generate a number between 0 and 1 to use with the CDF function
-
-        let distribution = NormalDistribution::new(median, 20.0);
-
-        let mut rng = rand::thread_rng();
-
-        let number = rng.gen_range(0.0..1.0);
-
-        let age = distribution.quartile(number);
-
-        if age > 0.0 {
-            return age.ceil() as u32;
-        }
-    }
-}
-
 #[wasm_bindgen]
 pub struct Diet {
     // 1.00 = 100% of what we need, 0.50 = 50% of what we need
