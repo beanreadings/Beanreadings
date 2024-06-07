@@ -14,6 +14,11 @@ use wasm_bindgen::prelude::*;
 mod age;
 mod types;
 
+mod causes;
+mod factors;
+
+mod bean;
+
 // my custom cool normal distribution function stuff that i made
 #[wasm_bindgen]
 pub struct Diet {
