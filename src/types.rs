@@ -75,6 +75,8 @@ pub struct Settings {
 
     pub drinkers: f64, // percentage of population who drinks alcohol
 
+    pub hard_drugger: f64, // percentage of population who uses hard drugs
+
     pub sugar: f64, // % of the RDI of sugar in the diet
 
     pub salt: f64, // % of the RDI of salt in the diet
@@ -97,6 +99,7 @@ impl Settings {
             weed_smokers: 0.1,
             vapers: 0.1,
             drinkers: 0.2,
+            hard_drugger: 0.05,
             sugar: 0.5,
             salt: 0.5,
             fat: 0.5,
@@ -160,5 +163,10 @@ impl Settings {
     #[wasm_bindgen]
     pub fn set_wealth_factor(&mut self, wealth_factor: f64) {
         self.wealth_factor = wealth_factor;
+    }
+
+    #[wasm_bindgen]
+    pub fn set_hard_drugger(&mut self, hard_drugger: f64) {
+        self.hard_drugger = hard_drugger;
     }
 }
