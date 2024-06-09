@@ -7,20 +7,25 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 pub struct AgeGenerator {
     pub median_age: f64,
+
+    rng: ThreadRng,
 }
 
 #[wasm_bindgen]
 impl AgeGenerator {
     #[wasm_bindgen(constructor)]
     pub fn new(median_age: f64) -> AgeGenerator {
-        AgeGenerator { median_age }
+        AgeGenerator {
+            median_age,
+            rng: rand::thread_rng(),
+        }
     }
 
     pub fn update_median_age(&mut self, median_age: f64) {
         self.median_age = median_age;
     }
 
-    pub fn generate_age(&self) -> i32 {
+    pub fn generate_age(&mut self) -> i32 {
         // This is a completely custom approach to Age generation by me. We don't use distributions
         // like normal distributions or uniform. We use a custom approach by Aityz :)
 
@@ -30,7 +35,7 @@ impl AgeGenerator {
         // center on the median age, i can say around 40% of the population is within 10 years of
         // the median age
 
-        let mut rng = rand::thread_rng();
+        let rng = &mut self.rng;
 
         let chance = rng.gen_bool(0.4);
 

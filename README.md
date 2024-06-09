@@ -57,3 +57,4 @@ src/age.rs: Super fast age generation library, with multiple methods for generat
 src/types.rs: Contains some of the types required for the simulation to function properly.
 src/causes.rs: Causes for death. This contains types relating to the way people could die. Data is from Our World in Data ([This Article](https://ourworldindata.org/causes-of-death)).
 src/factors.rs: Contains re-exports for the factors that will contribute to dying.
+src/simul.rs: The main simulation logic. This is where the magic happens. It is the most important file in the entire project.

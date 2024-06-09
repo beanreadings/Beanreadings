@@ -7,6 +7,7 @@ use wasm_bindgen::prelude::*;
 /// Factor trait, which contains a name and a value. The name is the name of the factor, and the
 /// value is the value of the factor. The value is a floating point number between 0 and 1, and
 /// represents the likelihood of the bean dying of a certain death.
+
 pub trait Factor {
     fn get_name(&self) -> String;
     fn get_value(&self) -> f64;

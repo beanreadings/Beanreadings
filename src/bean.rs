@@ -19,7 +19,7 @@ pub struct Bean {
 #[wasm_bindgen]
 impl Bean {
     #[wasm_bindgen(constructor)]
-    pub fn new(context: &Settings, age_gen: &AgeGenerator) -> Self {
+    pub fn new(context: &Settings, age_gen: &mut AgeGenerator) -> Self {
         let mut rng = rand::thread_rng();
 
         let age = age_gen.generate_age().abs() as u32; // using my custom age generator logic
@@ -150,6 +150,81 @@ impl Bean {
             cancer += 0.02;
             respiratory_disease += 0.03;
             cardiovascular_disease += 0.02;
+        }
+
+        if self.factors.smokes_vape {
+            // vapers tend to die more from lung cancer, respitory diseases and even cardiovascular
+            // diseases
+
+            cancer += 0.01;
+            respiratory_disease += 0.02;
+            cardiovascular_disease += 0.01;
+        }
+
+        if self.factors.smokes_weed {
+            cancer += 0.005;
+
+            respiratory_disease += 0.0003;
+        }
+
+        if self.factors.consumes_hard_drugs {
+            cancer += 0.09;
+
+            respiratory_disease += 0.05;
+        }
+
+        if self.factors.binge_drinker {
+            cancer += 0.02;
+
+            cardiovascular_disease += 0.03;
+        }
+
+        if self.factors.alcoholism {
+            cancer += 0.005;
+        }
+
+        if self.factors.sugar.value > 1.0 {
+            // more sugar than recommended
+
+            diabetes += 0.02;
+        }
+
+        if self.factors.salt.value > 1.0 {
+            // more salt than recommended
+
+            cardiovascular_disease += 0.01;
+        }
+
+        if self.factors.fat.value > 1.0 {
+            // more fat than recommended
+
+            cardiovascular_disease += 0.02;
+        }
+
+        if self.factors.vitamins.value < 1.0 {
+            // less vitamins than recommended
+
+            malnutrition += 0.02;
+        }
+
+        let death = rng.gen_bool(
+            (cardiovascular_disease
+                + cancer
+                + respiratory_disease
+                + digestive_disease
+                + infection
+                + neonatal
+                + dimentia
+                + diabetes
+                + diarrheal_disease
+                + liver_disease
+                + kidney_disease
+                + malnutrition)
+                / 10.0,
+        );
+
+        if death {
+            return true; // this bean dies
         }
 
         false

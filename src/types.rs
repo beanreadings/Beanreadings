@@ -6,22 +6,16 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 #[derive(Debug, Clone, Copy)]
 pub struct Simulation {
-    pub config: SimulationConfig,
+    pub settings: Settings,
 }
 
 #[wasm_bindgen]
 impl Simulation {
     #[wasm_bindgen(constructor)]
-    pub fn new(config: SimulationConfig) -> Simulation {
-        Simulation { config }
+    pub fn new(config: Settings) -> Simulation {
+        Simulation { settings: config }
     }
     // we add other simulation related methods in src/simulation.rs and not here
-}
-
-#[wasm_bindgen]
-#[derive(Debug, Clone, Copy)]
-pub struct SimulationConfig {
-    pub params: u32, // TODO
 }
 
 #[wasm_bindgen]
@@ -33,13 +27,23 @@ pub struct SimulationResult {
 
 #[wasm_bindgen]
 impl SimulationResult {
+    #[wasm_bindgen]
     pub fn get_population(&self) -> u32 {
         self.population
     }
 
+    #[wasm_bindgen]
     pub fn get_population_curve(&self) -> Vec<u32> {
         // it cant implement Copy because Vec is not Copy
         self.population_curve.clone()
+    }
+
+    #[wasm_bindgen(constructor)]
+    pub fn new(population: u32, population_curve: Vec<u32>) -> SimulationResult {
+        SimulationResult {
+            population,
+            population_curve,
+        }
     }
 }
 
@@ -62,8 +66,9 @@ impl From<ErrorCode> for String {
 }
 
 #[wasm_bindgen]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct Settings {
+    pub years: u32,      // how many years the simulation will run for
     pub population: u32, // base population
     pub max_age: u32, // Longevity Escape Velocity could come in the future, especially with AGI on
     // the horizon, so this should be a customizable parameter
@@ -93,6 +98,7 @@ impl Settings {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Settings {
+            years: 10,
             population: 1000,
             max_age: 100,
             smokers: 0.2,
@@ -168,5 +174,10 @@ impl Settings {
     #[wasm_bindgen]
     pub fn set_hard_drugger(&mut self, hard_drugger: f64) {
         self.hard_drugger = hard_drugger;
+    }
+
+    #[wasm_bindgen]
+    pub fn set_years(&mut self, years: u32) {
+        self.years = years;
     }
 }
