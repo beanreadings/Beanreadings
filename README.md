@@ -51,10 +51,10 @@ inference returned 1050, the loss would be 102,500, which is much larger than 43
 
 As we believe the National Institute of Health is a reliable source, we have used their information to make our predictions. We have also used the USDA's data tables, and CDC's statistics. Every site on this list should be from a reliable source, preferably from a government page. As the government of the United States is a large government, with much data and abundant research papers, much of our research and simulations are based on data from their sources.
 # Code Structure
-The code is structured as follows:
-src/lib.rs: Just a wrapper for everything, with re-exports and it's the entry point for the WebAssembly binary.
-src/age.rs: Super fast age generation library, with multiple methods for generating ages with a good distribution (centered around a specified median age).
-src/types.rs: Contains some of the types required for the simulation to function properly.
-src/causes.rs: Causes for death. This contains types relating to the way people could die. Data is from Our World in Data ([This Article](https://ourworldindata.org/causes-of-death)).
-src/factors.rs: Contains re-exports for the factors that will contribute to dying.
-src/simul.rs: The main simulation logic. This is where the magic happens. It is the most important file in the entire project.
+The code is structured as follows:\
+**src/lib.rs:** Just a wrapper for everything, with re-exports and it's the entry point for the WebAssembly binary.\
+**src/age.rs:** Super fast age generation library, with multiple methods for generating ages with a good distribution (centered around a specified median age).\
+**src/types.rs:** Contains some of the types required for the simulation to function properly.\
+**src/causes.rs:** Causes for death. This contains types relating to the way people could die. Data is from Our World in Data ([This Article](https://ourworldindata.org/causes-of-death)).\
+**src/factors.rs:** Contains re-exports for the factors that will contribute to dying.\
+**src/simul.rs:** The main simulation logic. This is where the magic happens. It is the most important file in the entire project.

@@ -4,21 +4,83 @@
     <title>Simulation</title>
     <script src="index.js" type="module"></script>
     <script type="module">
-      import { simulate } from "./index.js";
+      import { simulate, openConfigure, closeConfigure, applyConfig } from "./index.js";
       window.simulate = simulate;
+      window.openConfigure = openConfigure;
+      window.closeConfigure = closeConfigure;
+      window.applyConfig = applyConfig;
     </script>
-    <style>
-      body {
-        font-family: Arial;
-      }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="./styles.css" />
   </head>
 
   <body>
-    <h1>Simulations</h1>
-    <p>Project for Science Talent Quest</p>
-    <button onclick="simulate()">Simulate</button>
-    <br />
-    <p id="result"></p>
+    <div class="header">
+      <h1>Beanreadings</h1>
+    </div>
+    <div class="sim-graph">
+      <canvas id="graph" width="100px"></canvas>
+    </div>
+    <div class="sim-results">
+      <h2>Simulation Results</h2>
+      <div class="inner">
+        <table>
+          <tr>
+            <th>Year</th>
+            <th>Population</th>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="sim-controls">
+      <button onclick="simulate()">Simulate</button>
+      <button onclick="openConfigure()">Configure</button>
+    </div>
+
+    <div id="config-popup" class="popup">
+      <div class="popup-content">
+        <h2>Configure Simulation</h2>
+        <div class="content">
+          <div class="category">
+            <h3>Simulation</h3>
+            <label for="population">Starting Population:</label>
+            <input type="number" id="population" value="1000"/>
+            <label for="years">Number of years to simulate:</label>
+            <input type="number" id="years" value="10"/>
+            <label for="max-age">Max age:</label>
+            <input type="number" id="max-age" value="100"/>
+            <label for="wealth-factor">Wealth Factor (%):</label>
+            <input type="number" id="wealth-factor" value="-10"/>
+          </div>
+          <div class="category">
+            <h3>Behaviour</h3>
+            <label for="drinkers">Alcohol Drinkers (%):</label>
+            <input type="number" id="drinkers" value="20"/>
+            <label for="drug-users">Drug Users (%):</label>
+            <input type="number" id="drug-users" value="5"/>
+            <label for="smokers">Smokers (%):</label>
+            <input type="number" id="smokers" value="20"/>
+            <label for="vapers">Vapers (%):</label>
+            <input type="number" id="vapers" value="10"/>
+            <label for="weed-smokers">Weed Smokers (%):</label>
+            <input type="number" id="weed-smokers" value="10"/>
+          </div>
+          <div class="category">
+            <h3>Diet</h3>
+            <label for="fat">Fat (%):</label>
+            <input type="number" id="fat" value="50"/>
+            <label for="salt">Salt (%):</label>
+            <input type="number" id="salt" value="50"/>
+            <label for="sugar">Sugar (%):</label>
+            <input type="number" id="sugar" value="50"/>
+            <label for="vitamins">Vitamins (%):</label>
+            <input type="number" id="vitamins" value="50"/>
+          </div>
+        </div>
+        <p id="conf-status">✓ Configuration applied</p>
+        <button onclick="applyConfig()">Apply</button>
+        <button onclick="closeConfigure()">Close</button>
+      </div>
+    </div>
   </body>
 </html>

@@ -1,0 +1,202 @@
+body {
+    background-color: #242424;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #fff;
+    overflow: hidden;
+}
+
+.header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    background-color: #161616;
+    border-bottom: #0a0a0a solid 5px;
+}
+
+.header h1 {
+    margin: 0;
+    padding: 5px;
+    text-align: center;
+    font-size: 2em;
+}
+
+.sim-graph {
+    position: absolute;
+    top: calc(2em + 20px);
+    left: 0;
+    width: calc(80vw - 2.5px);
+    height: 80vh;
+    border-right: #0a0a0a solid 5px;
+    border-bottom: #0a0a0a solid 5px;
+}
+
+.sim-graph canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.sim-results {
+    position: absolute;
+    top: calc(2em + 20px);
+    right: 0;
+    width: calc(20vw - 2.5px);
+    height: 80vh;
+    border-left: #0a0a0a solid 5px;
+    border-bottom: #0a0a0a solid 5px;
+    overflow-y: auto;
+}
+
+.sim-results .inner {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sim-results h2 {
+    margin: 0;
+    padding: 5px;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+.sim-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: calc(20vh - (2em + 25px));
+    border-top: #0a0a0a solid 5px;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.sim-controls button {
+    margin: 0;
+    padding: 0;
+    width: 100px;
+    height: 40px;
+    background-color: #161616;
+    color: #fff;
+    border: none;
+    font-size: 1em;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table th,
+table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #121212;
+    font-weight: bold;
+}
+
+table tr:nth-child(odd) {
+    background-color: #191919;
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.popup-content {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 16px;
+    width: 600px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transform: scale(0);
+}
+.popup-content .content {
+    display: flex;
+    justify-content: center;
+    gap: 20px
+}
+
+.popup-content h2 {
+    margin-top: 0;
+    text-align: center;
+}
+
+.popup-content label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.popup-content input {
+    width: calc(100% - 20px);
+    padding: 5px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.popup-content button {
+    width: calc(50% - 10px);
+    padding: 10px;
+    margin: 5px;
+    background-color: #161616;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all ease 0.5s;
+}
+
+.popup-content button:hover {
+    background-color: #222;
+}
+
+.popup-content #conf-status {
+    color: #45c947;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+input[type="number"] {
+    width: calc(100% - 20px);
+    padding: 5px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 2px solid #0a0a0a;
+    background-color: #161616;
+    color: #fff;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: #4050ad;
+    box-shadow: 0 0 5px #4050ad;
+}
