@@ -22,8 +22,6 @@ Make sure you have the wasm32-unknown-unknown target installed on Rustup. If you
 rustup target add wasm32-unknown-unknown
 ```
 Without this toolchain, the WebAssembly binary will not be built, and the website will not work.
-# Findings
-- Blah blah blah
 # Features
 - Lightning fast, written in Rust. Native, it is even faster than on the web, but it still has a reasonable speed.
 - Beautiful User Interface made with HTML, CSS and JavaScript.
